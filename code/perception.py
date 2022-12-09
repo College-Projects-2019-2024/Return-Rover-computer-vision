@@ -218,12 +218,14 @@ def perception_step(Rover):
     # 3) Apply color threshold to identify navigable terrain/obstacles/rock samples
     navigable = color_thresh(warped)
     rocks = rock_thresh(warped)
+    obstacles = np.absolute(np.float32(navigable)-1)*mask
     # 4) Update Rover.vision_image (this will be displayed on left side of screen)
         # Example: Rover.vision_image[:,:,0] = obstacle color-thresholded binary image
         #          Rover.vision_image[:,:,1] = rock_sample color-thresholded binary image
         #          Rover.vision_image[:,:,2] = navigable terrain color-thresholded binary image
     Rover.vision_image[:,:,1] = rocks *255
     Rover.vision_image[:,:,2] = navigable*255
+    Rover.vision_image[:,:,0] = obstacles*255
 
     # 5) Convert map image pixel values to rover-centric coords
     # 6) Convert rover-centric pixel values to world coordinates
