@@ -77,6 +77,16 @@ def perspect_transform(img, src, dst):
     
     return warped
 
+def rock_thresh(img, yellow_thresh=(100, 100, 20)):
+    x = np.zeros_like(img[:,:,0])
+
+    rock = (img[:,:,0] > yellow_thresh[0]) \
+                & (img[:,:,1] > yellow_thresh[1]) \
+                & (img[:,:,2] < yellow_thresh[2])
+
+    x[rock] = 1
+    return x
+
 
 # Apply the above functions in succession and update the Rover state accordingly
 def perception_step(Rover):
