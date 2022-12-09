@@ -168,6 +168,9 @@ def translate_pix(xpix_rot, ypix_rot, xpos, ypos, scale):
     # Return the result  
     return xpix_translated, ypix_translated
 
+def impose(xpix, ypix, range=80):      # to make x and y more clear and detected more accuarte
+    dist = np.sqrt(xpix**2 + ypix**2)
+    return xpix[dist < range], ypix[dist < range]
 
 # Define a function to apply rotation and translation (and clipping)
 # Once you define the two functions above this function should work
@@ -231,13 +234,9 @@ def perception_step(Rover):
         # Rover.nav_dists = rover_centric_pixel_distances
         # Rover.nav_angles = rover_centric_angles
 
-    dist, angles = to_polar_coords(xpix_navigable, ypix_navigable)
+   dist, angles = to_polar_coords(xpix_navigable, ypix_navigable)
     Rover.nav_dists = dist
     Rover.nav_angles = angles
-        # Same for rock samples
-    dist, angles = to_polar_coords(xpix_rocks, ypix_rocks)
-    Rover.samples_dists = dist
-    Rover.samples_angles = angles
     
  
     
