@@ -1,6 +1,119 @@
 import numpy as np
 import cv2
 
+def sub(arr, window):   
+    m = arr.shape[1]
+    supressedarr = np.ndarray(shape =(0, m), dtype = arr.dtype)
+    
+
+    for element in arr:
+        u = True
+        for suppressed in supressedarr:
+            c = 0      
+            for k in range (m):
+                if ( abs (element[k] - suppressed[k])  < window) :
+                    c+=1 
+            e=0
+            for k in range (m):
+                if ( abs (element[k] - suppressed[k])  == 0) :
+                    e+=1
+            if (c==m and e!=m):
+                    u = False
+                    for i in range (m):
+                        suppressed[i] =( suppressed[i] + element[i] )/2
+
+        if (u):
+            supressedarr = np.append(np.array(  [element]  ), supressedarr, axis=0)
+
+
+    return supressedarr
+
+def get_src():
+    example_grid = "../calibration_images/example_grid1.jpg"
+
+    grid_img = cv2.imread(example_grid)
+
+
+    gray = cv2.cvtColor(grid_img,cv2.COLOR_BGR2GRAY)
+
+
+    blurred = cv2.GaussianBlur(gray, (3,3), 0)
+
+    edges = cv2.Canny(blurred, 70,30)
+
+
+    lines = cv2.HoughLinesP(edges, 1, np.pi/180, 10, minLineLength=80, maxLineGap=60)
+
+    lines = lines.reshape(  (lines.shape[0], lines.shape[2])   )  
+
+    height, width = edges.shape
+    mask = np.zeros_like(edges)
+    polygon = np.array([[
+
+
+    (0,     height),
+
+    (0,     int(height*0.8)),                         
+    # Bottom-left point
+    (int(width*0.2),  int(height*0.55)),    # Top-left point
+    (int(width*0.8), int(height*0.55)),    # Top-right point
+    (width,     int(height*0.8)),
+    (width, height),                        # Bottom-right point
+    ]], np.int32)
+    cv2.fillPoly(mask, polygon, 255)
+
+
+    edges = cv2.bitwise_and(mask, edges)
+
+
+    lines = cv2.HoughLinesP(edges, 1, np.pi/180, 10, minLineLength=100, maxLineGap=60)
+
+    lines = lines.reshape(  (lines.shape[0], lines.shape[2])   )  
+
+
+    img = np.zeros_like(edges, dtype=None, shape=None)
+
+
+    lines = sub(lines,30)
+
+    out= []
+
+    for i in range (4):
+
+        gg = np.zeros_like(edges, dtype=None, shape=None)
+
+        x1, y1, x2, y2 = lines[i]
+
+        cv2.line(gg, (x1, y1), (x2, y2), 50, 1)
+
+        out.append(gg)
+    
+    points = np.ndarray(shape=(0,2),dtype=np.int32)
+
+
+    for k in range (1,4):
+        out[0] += out[k]
+
+    out[0][out[0] <=50] = 0
+
+    for j in range (out[0].shape[0]):
+        for i in range (out[0].shape[1]):
+            if (out[0][j][i]>80):
+                points = np.append(points, np.array(  [[i,j]]  ), axis=0)
+
+    subressedpoints =   sub(points, 4)               
+    
+    
+    subressedpoints[[0, 1]] = subressedpoints[[1, 0]]
+    
+
+    return subressedpoints
+
+
+
+
+
+
 # Identify pixels above the threshold
 # Threshold of RGB > 160 does a nice job of identifying ground pixels only
 def color_thresh(img, rgb_thresh=(160, 160, 160)):
@@ -87,6 +200,8 @@ def rock_thresh(img, yellow_thresh=(100, 100, 20)):
 
     x[rock] = 1
     return x
+
+src = get_src()
 
 
 # Apply the above functions in succession and update the Rover state accordingly
