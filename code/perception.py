@@ -209,6 +209,7 @@ src = get_src()
 
 # Apply the above functions in succession and update the Rover state accordingly
 def perception_step(Rover):
+    img = Rover.img
     # Perform perception steps to update Rover()
     # TODO: 
     # NOTE: camera image is coming to you in Rover.img
@@ -217,7 +218,7 @@ def perception_step(Rover):
         # These source and destination points are defined to warp the image
         # to a grid where each 10x10 pixel square represents 1 square meter
         # The destination box will be 2dst_size on each side
-        dst_size = 5
+    dst_size = 5
         # Set a bottom offset to account for the fact that the bottom of the image
         # is not the position of the rover but a bit in front of it
         # this is just a rough guess, feel free to change it!
@@ -249,8 +250,8 @@ def perception_step(Rover):
     xpix_rocks, ypix_rocks = rover_coords(rocks)
     # 6) Convert rover-centric pixel values to world coordinates
     scale = 10.0
-    xpix_navigable, ypix_navigable = impose_range(xpix_navigable, ypix_navigable)
-    xpix_obstacles, ypix_obstacles = impose_range(xpix_obstacles, ypix_obstacles)
+    xpix_navigable, ypix_navigable = impose(xpix_navigable, ypix_navigable)
+    xpix_obstacles, ypix_obstacles = impose(xpix_obstacles, ypix_obstacles)
     navigable_x_world, navigable_y_world = pix_to_world(xpix_navigable, ypix_navigable,
                                                         Rover.pos[0], Rover.pos[1],
                                                         Rover.yaw, Rover.worldmap.shape[0], scale)
@@ -274,7 +275,7 @@ def perception_step(Rover):
         # Rover.nav_dists = rover_centric_pixel_distances
         # Rover.nav_angles = rover_centric_angles
 
-   dist, angles = to_polar_coords(xpix_navigable, ypix_navigable)
+    dist, angles = to_polar_coords(xpix_navigable, ypix_navigable)
     Rover.nav_dists = dist
     Rover.nav_angles = angles
     
