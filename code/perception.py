@@ -79,7 +79,7 @@ def perspect_transform(img, src, dst):
     
     return warped,mask
 
-def impose(xpix, ypix, range=70):      # to make the view shorte to see (limits visual acuity)
+def impose(xpix, ypix, range=70):      # to limit the vision range to a certain distance 
     dist = np.sqrt(xpix**2 + ypix**2)
     return xpix[dist < range], ypix[dist < range]
 
