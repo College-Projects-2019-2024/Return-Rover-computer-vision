@@ -184,7 +184,7 @@ def pix_to_world(xpix, ypix, xpos, ypos, yaw, world_size, scale):
     y_pix_world = np.clip(np.int_(ypix_tran), 0, world_size - 1)
     # Return the result
     return x_pix_world, y_pix_world
-
+kernel = np.ones((3,3))
 # Define a function to perform a perspective transform
 def perspect_transform(img, src, dst):
            
@@ -232,6 +232,7 @@ def perception_step(Rover):
     warped,mask = perspect_transform(Rover.img,source,destination)
     # 3) Apply color threshold to identify navigable terrain/obstacles/rock samples
     navigable = color_thresh(warped)
+    navigable = cv2.morphologyEx(navigable, cv2.MORPH_CLOSE, kernel)
     rocks = rock_thresh(warped)
     obstacles = np.absolute(np.float32(navigable)-1)*mask
     # 4) Update Rover.vision_image (this will be displayed on left side of screen)
