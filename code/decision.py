@@ -6,8 +6,8 @@ import numpy as np
 def decision_step(Rover):
     
     xx, yy  = Rover.pos
-    xx = round (xx/10)
-    yy = round (yy/10)
+    xx = round (xx/Rover.mapScale)
+    yy = round (yy/Rover.mapScale)
     Rover.vis[yy][xx] =1
     print (Rover.vis)
 

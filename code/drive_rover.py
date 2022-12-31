@@ -82,8 +82,8 @@ class RoverState():
 
 
         self.pid = PID(0.8, 0.2, 0.0, setpoint=0)
-        
-        self.vis = np.zeros((20,20))
+        self.mapScale = 10
+        self.vis = np.zeros((int (200/self.mapScale),int (200 /self.mapScale)))
 # Initialize our rover 
 Rover = RoverState()
 
