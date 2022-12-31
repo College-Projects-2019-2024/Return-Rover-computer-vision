@@ -1,11 +1,70 @@
 import numpy as np
+from scipy.signal import find_peaks
+import matplotlib.pyplot as plt
 
 
 # This is where you can build a decision tree for determining throttle, brake and steer 
 # commands based on the output of the perception_step() function
+
+def cost(peak, prefix, xo, yo, yaw, vis):
+    
+    c=0
+    for r in range (10):
+        x= r *np.sin(yaw)
+        x = round(x)
+        y = r * np.cos(yaw)
+        y = round (y)
+
+        
+        for t in range (-1,2):
+            for r in range (-1,2):
+                jj = t+yo+y
+                ii = r+xo+x
+                if (jj) > -1  and (ii) > -1 and (jj) < 20  and (ii) <20:
+                    c+= vis[jj][ii]
+
+
+    ans = prefix[peak] - 20*c
+
+    ##ans = prefix[peak]
+    return ans
+
 def Angle (Rover):
-    Rover.pid.setpoint = np.clip(np.mean(Rover.nav_angles * 180/np.pi), -15, 15) 
-    return int (Rover.pid(Rover.steer))
+    s = 5
+    size = int (180 / s)
+    shift = int (size /2)
+
+    simplified_prefix = np.zeros(size)
+    down = (np.array((range(size)))- shift)
+
+    for x in Rover.nav_angles:
+        f= x*360 / (2*np.pi)
+        simplified_prefix[round (f/s)+shift]+=1
+        #print(simplified_prefix)
+
+
+    simplified_peaks, _ = find_peaks(simplified_prefix, distance=s*5,height=np.max(simplified_prefix)/3, threshold = 1)
+
+    """ plt.title("angels freqency")
+    plt.plot(simplified_peaks-shift, simplified_prefix[simplified_peaks], "x")
+    plt.plot(down, simplified_prefix, color="red")
+    plt.show()"""
+
+
+    if (simplified_peaks.size == 0):
+        Rover.pid.setpoint = np.clip(np.mean(Rover.nav_angles * 180/np.pi), -15, 15) 
+        return int (Rover.pid(Rover.steer))
+
+    else:
+        ans = simplified_peaks[0]
+        print((simplified_peaks-shift)*s )
+        xo, yo = Rover.pos
+        for p in simplified_peaks:
+            if ( cost(p,simplified_prefix,xo,yo,Rover.yaw, Rover.vis) > cost(ans,simplified_prefix,xo,yo,Rover.yaw, Rover.vis)):
+                ans = p
+        Rover.pid.setpoint = (ans-shift)*s
+        return int (Rover.pid(Rover.steer))
+
 
 
 
@@ -15,7 +74,7 @@ def decision_step(Rover):
     xx = round (xx/Rover.mapScale)
     yy = round (yy/Rover.mapScale)
     Rover.vis[20-yy][xx] =1
-    print (Rover.vis)
+    ###############333333print (Rover.vis)
 
     # Implement conditionals to decide what to do given perception data
     # Here you're all set up with some basic functionality but you'll need to
