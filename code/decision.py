@@ -8,7 +8,7 @@ def decision_step(Rover):
     xx, yy  = Rover.pos
     xx = round (xx/Rover.mapScale)
     yy = round (yy/Rover.mapScale)
-    Rover.vis[yy][xx] =1
+    Rover.vis[20-yy][xx] =1
     print (Rover.vis)
 
     # Implement conditionals to decide what to do given perception data
