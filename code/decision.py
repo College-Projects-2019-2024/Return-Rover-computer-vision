@@ -24,7 +24,7 @@ def cost(peak, prefix, xo, yo, yaw, vis):
                     c+= vis[jj][ii]
 
 
-    ans = prefix[peak] - 50*c
+    ans = prefix[peak] - 1500*c
 
     ##ans = prefix[peak]
     return ans
@@ -38,7 +38,7 @@ def Angle (Rover):
         
 
 
-    simplified_peaks, _ = find_peaks(Rover.simplified_prefix , distance=Rover.prefixScale*5,height=np.max(Rover.simplified_prefix )/3, threshold = 1)
+    simplified_peaks, _ = find_peaks(Rover.simplified_prefix , distance=Rover.prefixScale*1,height=np.max(Rover.simplified_prefix )/4, threshold = 1)
 
 
 
@@ -79,11 +79,19 @@ def decision_step(Rover):
             if len(Rover.nav_angles) >= Rover.stop_forward:  
                 # If mode is forward, navigable terrain looks good 
                 # and velocity is below max, then throttle 
-                if Rover.vel < Rover.max_vel:
-                    # Set throttle value to throttle setting
-                    Rover.throttle = Rover.throttle_set
-                else: # Else coast
-                    Rover.throttle = 0
+                if (abs(Rover.steer) > 8):
+                    if Rover.vel < Rover.max_vel_turning:
+                        # Set throttle value to throttle setting
+                        Rover.throttle = Rover.throttle_set
+                    else: # Else coast
+                        Rover.throttle = 0
+
+                else :
+                    if Rover.vel < Rover.max_vel:
+                        # Set throttle value to throttle setting
+                        Rover.throttle = Rover.throttle_set
+                    else: # Else coast
+                        Rover.throttle = 0
                 Rover.brake = 0
                 # Set steering to average angle clipped to the range +/- 15
                 
