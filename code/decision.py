@@ -24,31 +24,22 @@ def cost(peak, prefix, xo, yo, yaw, vis):
                     c+= vis[jj][ii]
 
 
-    ans = prefix[peak] - 20*c
+    ans = prefix[peak] - 50*c
 
     ##ans = prefix[peak]
     return ans
 
 def Angle (Rover):
-    s = 5
-    size = int (180 / s)
-    shift = int (size /2)
+    Rover.simplified_prefix = np.zeros(Rover.prefixSize)
 
-    simplified_prefix = np.zeros(size)
-    down = (np.array((range(size)))- shift)
-
-    for x in Rover.nav_angles:
+    for x in Rover.nav_angles_processed:
         f= x*360 / (2*np.pi)
-        simplified_prefix[round (f/s)+shift]+=1
+        Rover.simplified_prefix[round (f/Rover.prefixScale)+Rover.prefixshift]+=1
         #print(simplified_prefix)
 
 
-    simplified_peaks, _ = find_peaks(simplified_prefix, distance=s*5,height=np.max(simplified_prefix)/3, threshold = 1)
+    simplified_peaks, _ = find_peaks(Rover.simplified_prefix , distance=Rover.prefixScale*5,height=np.max(Rover.simplified_prefix )/3, threshold = 1)
 
-    """ plt.title("angels freqency")
-    plt.plot(simplified_peaks-shift, simplified_prefix[simplified_peaks], "x")
-    plt.plot(down, simplified_prefix, color="red")
-    plt.show()"""
 
 
     if (simplified_peaks.size == 0):
@@ -57,12 +48,12 @@ def Angle (Rover):
 
     else:
         ans = simplified_peaks[0]
-        print((simplified_peaks-shift)*s )
+        print((simplified_peaks-Rover.prefixshift)*Rover.prefixScale )
         xo, yo = Rover.pos
         for p in simplified_peaks:
-            if ( cost(p,simplified_prefix,xo,yo,Rover.yaw, Rover.vis) > cost(ans,simplified_prefix,xo,yo,Rover.yaw, Rover.vis)):
+            if ( cost(p,Rover.simplified_prefix,xo,yo,Rover.yaw, Rover.vis) > cost(ans,Rover.simplified_prefix,xo,yo,Rover.yaw, Rover.vis)):
                 ans = p
-        Rover.pid.setpoint = (ans-shift)*s
+        Rover.pid.setpoint = (ans-Rover.prefixshift)*Rover.prefixScale
         return int (Rover.pid(Rover.steer))
 
 
@@ -74,7 +65,6 @@ def decision_step(Rover):
     xx = round (xx/Rover.mapScale)
     yy = round (yy/Rover.mapScale)
     Rover.vis[20-yy][xx] =1
-    ###############333333print (Rover.vis)
 
     # Implement conditionals to decide what to do given perception data
     # Here you're all set up with some basic functionality but you'll need to
@@ -100,7 +90,7 @@ def decision_step(Rover):
                 ########Rover.pid.setpoint = np.clip(np.mean(Rover.nav_angles * 180/np.pi), -15, 15) 
                 Rover.steer = Angle(Rover)
             # If there's a lack of navigable terrain pixels then go to 'stop' mode
-            elif len(Rover.nav_angles) < Rover.stop_forward:
+            elif len(Rover.nav_angles) < Rover.stop_forward or Rover.simplified_prefix[0] < 100 :
                     # Set mode to "stop" and hit the brakes!
                     Rover.throttle = 0
                     # Set brake to stored brake value

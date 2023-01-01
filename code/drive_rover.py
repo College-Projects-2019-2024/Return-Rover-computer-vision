@@ -51,7 +51,13 @@ class RoverState():
         self.steer = 0 # Current steering angle
         self.throttle = 0 # Current throttle value
         self.brake = 0 # Current brake value
+
+
         self.nav_angles = None # Angles of navigable terrain pixels
+        self.nav_angles_processed = None # Angles of navigable terrain pixels
+
+
+
         self.nav_dists = None # Distances of navigable terrain pixels
         self.ground_truth = ground_truth_3d # Ground truth worldmap
         self.mode = 'forward' # Current mode (can be forward or stop)
@@ -61,8 +67,8 @@ class RoverState():
         # of navigable terrain pixels.  This is a very crude form of knowing
         # when you can keep going and when you should stop.  Feel free to
         # get creative in adding new fields or modifying these!
-        self.stop_forward = 50 # Threshold to initiate stopping
-        self.go_forward = 500 # Threshold to go forward again
+        self.stop_forward = 400 # Threshold to initiate stopping
+        self.go_forward = 1100 # Threshold to go forward again
         self.max_vel = 2 # Maximum velocity (meters/second)
         # Image output from perception step
         # Update this image to display your intermediate analysis steps
@@ -81,9 +87,18 @@ class RoverState():
         self.send_pickup = False # Set to True to trigger rock pickup
 
 
-        self.pid = PID(0.8, 0.2, 0.0, setpoint=0)
+        self.pid = PID(0.45, 0.2, 0.0, setpoint=0)
         self.mapScale = 10
         self.vis = np.zeros((int (200/self.mapScale),int (200 /self.mapScale)))
+
+
+        self.simplified_prefix = None
+        self.prefixScale = 3
+        self.prefixSize = int (180 / self.prefixScale)
+        self.prefixshift = int (self.prefixSize /2)
+
+
+
 # Initialize our rover 
 Rover = RoverState()
 

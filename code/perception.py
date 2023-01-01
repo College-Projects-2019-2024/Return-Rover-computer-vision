@@ -2,6 +2,118 @@ import numpy as np
 import cv2
 
 
+def sub(arr, window):   
+    m = arr.shape[1]
+    supressedarr = np.ndarray(shape =(0, m), dtype = arr.dtype)
+    
+
+    for element in arr:
+        u = True
+        for suppressed in supressedarr:
+            c = 0      
+            for k in range (m):
+                if ( abs (element[k] - suppressed[k])  < window) :
+                    c+=1 
+            e=0
+            for k in range (m):
+                if ( abs (element[k] - suppressed[k])  == 0) :
+                    e+=1
+            if (c==m and e!=m):
+                    u = False
+                    for i in range (m):
+                        suppressed[i] =( suppressed[i] + element[i] )/2
+
+        if (u):
+            supressedarr = np.append(np.array(  [element]  ), supressedarr, axis=0)
+
+
+    return supressedarr
+
+def get_src():
+    example_grid = "../calibration_images/example_grid1.jpg"
+
+    grid_img = cv2.imread(example_grid)
+
+
+    gray = cv2.cvtColor(grid_img,cv2.COLOR_BGR2GRAY)
+
+
+    blurred = cv2.GaussianBlur(gray, (3,3), 0)
+
+    edges = cv2.Canny(blurred, 70,30)
+
+
+    lines = cv2.HoughLinesP(edges, 1, np.pi/180, 10, minLineLength=80, maxLineGap=60)
+
+    lines = lines.reshape(  (lines.shape[0], lines.shape[2])   )  
+
+    height, width = edges.shape
+    mask = np.zeros_like(edges)
+    polygon = np.array([[
+
+
+    (0,     height),
+
+    (0,     int(height*0.8)),                         
+    # Bottom-left point
+    (int(width*0.2),  int(height*0.55)),    # Top-left point
+    (int(width*0.8), int(height*0.55)),    # Top-right point
+    (width,     int(height*0.8)),
+    (width, height),                        # Bottom-right point
+    ]], np.int32)
+    cv2.fillPoly(mask, polygon, 255)
+
+
+    edges = cv2.bitwise_and(mask, edges)
+
+
+    lines = cv2.HoughLinesP(edges, 1, np.pi/180, 10, minLineLength=100, maxLineGap=60)
+
+    lines = lines.reshape(  (lines.shape[0], lines.shape[2])   )  
+
+
+    img = np.zeros_like(edges, dtype=None, shape=None)
+
+
+    lines = sub(lines,30)
+
+    out= []
+
+    for i in range (4):
+
+        gg = np.zeros_like(edges, dtype=None, shape=None)
+
+        x1, y1, x2, y2 = lines[i]
+
+        cv2.line(gg, (x1, y1), (x2, y2), 50, 1)
+
+        out.append(gg)
+    
+    points = np.ndarray(shape=(0,2),dtype=np.int32)
+
+
+    for k in range (1,4):
+        out[0] += out[k]
+
+    out[0][out[0] <=50] = 0
+
+    for j in range (out[0].shape[0]):
+        for i in range (out[0].shape[1]):
+            if (out[0][j][i]>80):
+                points = np.append(points, np.array(  [[i,j]]  ), axis=0)
+
+    subressedpoints =   sub(points, 4)               
+    
+    
+    subressedpoints[[0, 1]] = subressedpoints[[1, 0]]
+    
+
+    return subressedpoints
+
+
+
+
+
 # Identify pixels above the threshold
 # Threshold of RGB > 160 does a nice job of identifying ground pixels only
 def color_thresh(img, rgb_thresh=(160, 160, 160)):
@@ -79,7 +191,7 @@ def perspect_transform(img, src, dst):
     
     return warped,mask
 
-def impose(xpix, ypix, range=70):      # to limit the vision range to a certain distance 
+def impose(xpix, ypix, range=70):      # to make the view shorte to see (limits visual acuity)
     dist = np.sqrt(xpix**2 + ypix**2)
     return xpix[dist < range], ypix[dist < range]
 
@@ -95,7 +207,10 @@ def rock_thresh(img, yellow_thresh=(100, 100, 20)):
     return x
 
 
+kernelb = np.ones((7,7),np.uint8)
+kernels = np.ones((3,3),np.uint8)
 
+src = get_src()
 kernel = np.ones((3,3))
 
 
@@ -104,25 +219,17 @@ def perception_step(Rover):
     # TODO: 
     # NOTE: camera image is coming to you in Rover.img
     img = Rover.img
-    
     # 1) Define source and destination points for perspective transform
      # Define calibration box in source (actual) and destination (desired) coordinates
         # These source and destination points are defined to warp the image
         # to a grid where each 10x10 pixel square represents 1 square meter
         # The destination box will be 2*dst_size on each side
-        
     dst_size = 5
-    
         # Set a bottom offset to account for the fact that the bottom of the image
         # is not the position of the rover but a bit in front of it
         # this is just a rough guess, feel free to change it!
-        
     bottom_offset = 7
-    
-    #these points are the output of the grid image pipeline
-    #for more info on the pipeline see calibrate.ipynb
-    
-    source =  np.float32([[11 ,140],[301 ,140],[200 , 97],[114,  97]])
+    source = np.float32(src)
     destination = np.float32([[img.shape[1]/2 - dst_size, img.shape[0] - bottom_offset],
                   [img.shape[1]/2 + dst_size, img.shape[0] - bottom_offset],
                   [img.shape[1]/2 + dst_size, img.shape[0] - 2*dst_size - bottom_offset],
@@ -134,6 +241,13 @@ def perception_step(Rover):
     # 3) Apply color threshold to identify navigable terrain/obstacles/rock samples
 
     navigable = color_thresh(warped)
+    navigable_processed = navigable #######################################################################3
+    thresholde = cv2.morphologyEx(navigable_processed, cv2.MORPH_OPEN, kernelb)
+    thresholde = cv2.morphologyEx(thresholde, cv2.MORPH_CLOSE, kernels)
+    xpix_navigable_processed, ypix_navigable_processed = rover_coords(thresholde)
+    _, Rover.nav_angles_processed= to_polar_coords(xpix_navigable_processed, ypix_navigable_processed)
+                                    #######################################################################3
+
     navigable = cv2.morphologyEx(navigable, cv2.MORPH_CLOSE, kernel) #closing algo
     rocks = rock_thresh(warped)
     obstacles = np.absolute(np.float32(navigable)-1)*mask
@@ -172,11 +286,16 @@ def perception_step(Rover):
         #          Rover.worldmap[navigable_y_world, navigable_x_world, 2] += 1
 
         # Only update map if pitch an roll are near zero
-    
-    Rover.worldmap[obstacle_y_world, obstacle_x_world, 0] = 255
-    Rover.worldmap[rock_y_world, rock_x_world,1] = 255
-    Rover.worldmap[navigable_y_world, navigable_x_world, 2] = 255
+    if (Rover.pitch < 0.3 or Rover.pitch > 359.7) and (Rover.roll < 0.3 or Rover.roll > 359.7):
+        # increment = 10
+        Rover.worldmap[obstacle_y_world, obstacle_x_world, 0] = 255
+        Rover.worldmap[rock_y_world, rock_x_world,1] = 255
+        Rover.worldmap[navigable_y_world, navigable_x_world, 2] = 255
             # remove overlap mesurements
+        nav_pix = Rover.worldmap[:, :, 2] > 0
+        Rover.worldmap[nav_pix, 0] = 0
+            # clip to avoid overflow
+        Rover.worldmap = np.clip(Rover.worldmap, 0, 255)
        
 
     # 8) Convert rover-centric pixel positions to polar coordinates
