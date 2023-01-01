@@ -17,10 +17,12 @@ def convert_to_float(string_to_convert):
 
 
 def update_rover(Rover, data):
+        
     # Initialize start time and sample positions
     if Rover.start_time == None:
         Rover.start_time = time.time()
         Rover.total_time = 0
+        
         samples_xpos = np.int_([convert_to_float(pos.strip())
                                 for pos in data["samples_x"].split(';')])
         samples_ypos = np.int_([convert_to_float(pos.strip())

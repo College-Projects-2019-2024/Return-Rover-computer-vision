@@ -35,7 +35,7 @@ def Angle (Rover):
     for x in Rover.nav_angles_processed:
         f= x*360 / (2*np.pi)
         Rover.simplified_prefix[round (f/Rover.prefixScale)+Rover.prefixshift]+=1
-        #print(simplified_prefix)
+        
 
 
     simplified_peaks, _ = find_peaks(Rover.simplified_prefix , distance=Rover.prefixScale*5,height=np.max(Rover.simplified_prefix )/3, threshold = 1)
@@ -89,8 +89,13 @@ def decision_step(Rover):
                 
                 ########Rover.pid.setpoint = np.clip(np.mean(Rover.nav_angles * 180/np.pi), -15, 15) 
                 Rover.steer = Angle(Rover)
+                if (Rover.steer >=0):
+                    Rover.last_steer =1
+                else:
+                    Rover.last_steer = -1
             # If there's a lack of navigable terrain pixels then go to 'stop' mode
-            elif len(Rover.nav_angles) < Rover.stop_forward or Rover.simplified_prefix[0] < 100 :
+
+            elif  len(Rover.nav_angles) < Rover.stop_forward or (Rover.simplified_prefix[Rover.prefixshift]+Rover.simplified_prefix[Rover.prefixshift+1] +Rover.simplified_prefix[Rover.prefixshift-1] < 1200) :
                     # Set mode to "stop" and hit the brakes!
                     Rover.throttle = 0
                     # Set brake to stored brake value
@@ -113,7 +118,13 @@ def decision_step(Rover):
                     # Release the brake to allow turning
                     Rover.brake = 0
                     # Turn range is +/- 15 degrees, when stopped the next line will induce 4-wheel turning
-                    Rover.steer = -15 # Could be more clever here about which way to turn
+                    if (Rover.last_steer <=0 ) :
+                        Rover.steer = -15
+                    else:
+                        Rover.steer = 15
+
+                    
+                     # Could be more clever here about which way to turn
                 # If we're stopped but see sufficient navigable terrain in front then go!
                 if len(Rover.nav_angles) >= Rover.go_forward:
                     # Set throttle back to stored value
