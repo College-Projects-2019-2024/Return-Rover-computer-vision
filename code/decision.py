@@ -38,7 +38,7 @@ def Angle (Rover):
         
 
 
-    simplified_peaks, _ = find_peaks(Rover.simplified_prefix , distance=Rover.prefixScale*1,height=np.max(Rover.simplified_prefix )/4, threshold = 1)
+    simplified_peaks, _ = find_peaks(Rover.simplified_prefix , distance=Rover.prefixScale*3,height=np.max(Rover.simplified_prefix )/3, threshold = 1)
 
 
 
