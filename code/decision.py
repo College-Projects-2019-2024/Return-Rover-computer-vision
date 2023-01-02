@@ -25,7 +25,7 @@ def cost(peak, prefix, xo, yo, yaw, vis):
                     c+= vis[jj][ii]
 
 
-    ans = 150*c - int(prefix[peak]) 
+    ans = 500*c - int(prefix[peak]) 
 
     ##ans = prefix[peak]
     return ans
@@ -134,7 +134,7 @@ def decision_step(Rover):
                     Rover.brake = Rover.brake_set
                     Rover.steer = 0
                     Rover.mode = 'stop'
-                    if (cost(0, [0], xx, yy, Rover.yaw+90, Rover.vis) - cost(0, [0], xx, yy, Rover.yaw-90, Rover.vis) < 200) :
+                    if (cost(0, [0], xx, yy, Rover.yaw+90, Rover.vis) - cost(0, [0], xx, yy, Rover.yaw-90, Rover.vis) < 250) :
                         Rover.last_steer = +1
                     else:
                         Rover.last_steer = -1
