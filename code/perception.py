@@ -207,8 +207,8 @@ def rock_thresh(img, yellow_thresh=(100, 100, 20)):
     return x
 
 
-kernelb = np.ones((7,7),np.uint8)
-kernels = np.ones((3,3),np.uint8)
+kernelb = np.ones((21,21),np.uint8)
+kernels = np.ones((21,21),np.uint8)
 
 src = get_src()
 kernel = np.ones((3,3))
@@ -263,6 +263,8 @@ def perception_step(Rover):
 
     # 5) Convert map image pixel values to rover-centric coords
     xpix_navigable, ypix_navigable = rover_coords(navigable)
+    Rover.xpix = xpix_navigable
+    Rover.ypix = ypix_navigable
     xpix_obstacles, ypix_obstacles = rover_coords(obstacles)
     xpix_rocks, ypix_rocks = rover_coords(rocks)
 

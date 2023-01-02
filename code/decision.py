@@ -1,4 +1,5 @@
 import numpy as np
+from scipy.optimize import curve_fit
 from scipy.signal import find_peaks
 import matplotlib.pyplot as plt
 
@@ -29,7 +30,30 @@ def cost(peak, prefix, xo, yo, yaw, vis):
     ##ans = prefix[peak]
     return ans
 
+def mapping1(values_x,a,b,c): 
+    return a*values_x**2+b*values_x+c 
+
 def Angle (Rover):
+  
+    '''  args, covar = curve_fit(mapping1,Rover.xpix,Rover.ypix)
+
+    a,b,c = args[0], args[1], args[2] 
+
+    x0 = 5
+    x1 = 10
+
+    y0 = mapping1(x0,a,b,c)
+    y1 = mapping1(x1,a,b,c)
+
+    a = np.arctan((y1-y0)/(x1-x0))
+
+    Rover.pid.setpoint = (a*180/(2*np.pi))
+
+    print( Rover.pid.setpoint )
+    return int (Rover.pid(Rover.steer))
+
+
+    '''    
     Rover.simplified_prefix = np.zeros(Rover.prefixSize)
 
     for x in Rover.nav_angles_processed:
@@ -38,7 +62,7 @@ def Angle (Rover):
         
 
 
-    simplified_peaks, _ = find_peaks(Rover.simplified_prefix , distance=Rover.prefixScale*3,height=np.max(Rover.simplified_prefix )/3, threshold = 1)
+    simplified_peaks, _ = find_peaks(Rover.simplified_prefix , distance=Rover.prefixScale,height=np.max(Rover.simplified_prefix )/4, threshold = 1)
 
 
 
@@ -48,7 +72,7 @@ def Angle (Rover):
 
     else:
         ans = simplified_peaks[0]
-        print((simplified_peaks-Rover.prefixshift)*Rover.prefixScale )
+        ##print((simplified_peaks-Rover.prefixshift)*Rover.prefixScale )
         xo, yo = Rover.pos
         for p in simplified_peaks:
             if ( cost(p,Rover.simplified_prefix,xo,yo,Rover.yaw, Rover.vis) > cost(ans,Rover.simplified_prefix,xo,yo,Rover.yaw, Rover.vis)):
@@ -65,7 +89,7 @@ def decision_step(Rover):
     xx = round (xx/Rover.mapScale)
     yy = round (yy/Rover.mapScale)
     Rover.vis[20-yy][xx] =1
-
+    ##print (Rover.vis)
     # Implement conditionals to decide what to do given perception data
     # Here you're all set up with some basic functionality but you'll need to
     # improve on this decision tree to do a good job of navigating autonomously!
