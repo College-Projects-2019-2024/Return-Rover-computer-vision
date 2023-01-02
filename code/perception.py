@@ -97,7 +97,23 @@ def rock_thresh(img, yellow_thresh=(100, 100, 20)):
 
 
 kernel = np.ones((3,3))
-
+#converts a 1d image to 3d image
+def DtoDDD(oneDImg,ref):
+    DDDImage = np.zeros_like(ref)
+    DDDImage[:,:,0] = oneDImg
+    DDDImage[:,:,1] = oneDImg
+    DDDImage[:,:,2] = oneDImg
+    return DDDImage
+    
+#shows the output needed in debugging mode
+def show_img(img,warped,nav_terrain,rocks):
+    nav_terrain_3d = DtoDDD(nav_terrain,img)
+    rocks_3d = DtoDDD(rocks,img)
+    hori1 = np.concatenate((img,warped),axis=1)
+    hori = np.concatenate((nav_terrain_3d,rocks_3d),axis=1)
+    vert = np.concatenate((hori1,hori),axis=0)
+    cv2.imshow('debugging',vert)
+    cv2.waitKey(1)
 
 def perception_step(Rover):
     # Perform perception steps to update Rover()
