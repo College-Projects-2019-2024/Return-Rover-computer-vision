@@ -42,6 +42,9 @@ class RoverState():
     def __init__(self):
         self.start_time = None # To record the start time of navigation
         self.total_time = None # To record total duration of naviagation
+
+        self.stuck_time = 0
+
         self.img = None # Current camera image
         self.pos = None # Current position (x, y)
         self.yaw = None # Current yaw angle
@@ -94,13 +97,23 @@ class RoverState():
         self.pid = PID(0.4, 0.1, 0.0, setpoint=0)
         self.mapScale = 5
         self.vis = np.ones((int (200/self.mapScale),int (200 /self.mapScale)))
-        self.vis =-1 * self.vis
+        self.vis =-10 * self.vis
 
 
         self.simplified_prefix = None
         self.prefixScale = 3
         self.prefixSize = int (180 / self.prefixScale)
         self.prefixshift = int (self.prefixSize /2)
+
+
+
+
+            #rock stuff
+        self.rock_angles = None
+        self.rock_dists = None
+
+
+
 
 
 

@@ -25,7 +25,7 @@ def cost(peak, prefix, xo, yo, yaw, vis):
                     c+= vis[jj][ii]
 
 
-    ans = 500*c - int(prefix[peak]) 
+    ans = 1000*c - int(prefix[peak]) 
 
     ##ans = prefix[peak]
     return ans
@@ -80,6 +80,7 @@ def Angle (Rover):
         Rover.pid.setpoint = (ans-Rover.prefixshift)*Rover.prefixScale
         return int (Rover.pid(Rover.steer))
 
+        Rover.steer = Rover.pid(Rover.steer)
 
 
 
@@ -94,13 +95,39 @@ def decision_step(Rover):
     # Here you're all set up with some basic functionality but you'll need to
     # improve on this decision tree to do a good job of navigating autonomously!
 
+
+
+    #rock stuff
+    if len(Rover.rock_angles) > 0:
+            if(Rover.vel > 1.5):
+                Rover.brake = Rover.brake_set
+
+
+            Rover.throttle = 0.2
+            Rover.steer = np.clip(np.mean((Rover.rock_angles) * 180/np.pi), -15, 15)
+
+
+
+
     # Example:
     # Check if we have vision data to make decisions with
-    if Rover.nav_angles is not None:
+    elif Rover.nav_angles is not None:
         # Check for Rover.mode status
         if Rover.mode == 'forward': 
+
+            
             # Check the extent of navigable terrain
             if len(Rover.nav_angles) >= Rover.stop_forward:  
+
+                if Rover.vel == 0 and Rover.total_time - Rover.stuck_time > 4.0:
+                    # Set mode to "stuck" and hit the brakes!
+                    Rover.throttle = 0
+                    # Set brake to stored brake value
+                    Rover.brake = Rover.brake_set
+                    Rover.steer = 0
+                    Rover.mode='stuck'
+                    Rover.stuck_time = Rover.total_time
+
                 # If mode is forward, navigable terrain looks good 
                 # and velocity is below max, then throttle 
                 if (abs(Rover.steer) > 8):
@@ -140,6 +167,33 @@ def decision_step(Rover):
                         Rover.last_steer = -1
 
         # If we're already in "stop" mode then make different decisions
+        elif Rover.mode == 'stuck':
+            # if 1 sec passed go back to previous mode
+            if Rover.total_time - Rover.stuck_time > 1.5:
+                # Set throttle back to stored value
+                Rover.mode = 'stop'
+                #Rover.throttle = Rover.throttle_set
+                # Release the brake
+                #Rover.brake = 0
+                # Set steer to mean angle
+                # Hug left wall by setting the steer angle slightly to the left
+                #Rover.steer = np.clip(np.mean((Rover.nav_angles) * 180 / np.pi), -15, 15)
+                #Rover.mode = 'forward' # returns to previous mode
+            # Now we're stopped and we have vision data to see if there's a path forward
+            else:
+                Rover.throttle = 0
+                # Release the brake to allow turning
+                Rover.brake = 0
+                # Turn range is +/- 15 degrees, when stopped the next line will induce 4-wheel turning
+                # Since hugging left wall steering should be to the right:
+                if Rover.last_steer <= 0 :
+                        Rover.steer = -15
+                else:
+                    Rover.steer = 15
+        
+        
+        
+        
         elif Rover.mode == 'stop':
             # If we're in stop mode but still moving keep braking
             if Rover.vel > 0.2:
@@ -184,8 +238,11 @@ def decision_step(Rover):
         Rover.brake = 0
         
     # If in a state where want to pickup a rock send pickup command
-    if Rover.near_sample and Rover.vel == 0 and not Rover.picking_up:
-        Rover.send_pickup = True
+    
+    if Rover.near_sample and not Rover.picking_up:
+            Rover.brake = Rover.brake_set
+            Rover.send_pickup = True
+            Rover.rock_collected = True
     
     return Rover
 
