@@ -39,7 +39,8 @@ ground_truth_3d = np.dstack((ground_truth*0, ground_truth*255, ground_truth*0)).
 class RoverState():
     def __init__(self):
         self.start_time = None # To record the start time of navigation
-        self.total_time = None # To record total duration of naviagation
+        self.total_time = None 
+        self.stuck_time = 0 # To record total duration of naviagation
         self.img = None # Current camera image
         self.pos = None # Current position (x, y)
         self.yaw = None # Current yaw angle
@@ -50,7 +51,9 @@ class RoverState():
         self.throttle = 0 # Current throttle value
         self.brake = 0 # Current brake value
         self.nav_angles = None # Angles of navigable terrain pixels
-        self.nav_dists = None # Distances of navigable terrain pixels
+        self.nav_dists = None
+        self.rock_angles = None # Angles of rock pixels
+        self.rock_dists = None # Distances of rock pixels
         self.ground_truth = ground_truth_3d # Ground truth worldmap
         self.mode = 'forward' # Current mode (can be forward or stop)
         self.throttle_set = 0.2 # Throttle setting when accelerating
@@ -76,7 +79,8 @@ class RoverState():
         self.samples_collected = 0 # To count the number of samples collected
         self.near_sample = 0 # Will be set to telemetry value data["near_sample"]
         self.picking_up = 0 # Will be set to telemetry value data["picking_up"]
-        self.send_pickup = False # Set to True to trigger rock pickup
+        self.send_pickup = False
+        self.rock_collected = False # Set to True to trigger rock pickup
 # Initialize our rover 
 Rover = RoverState()
 
