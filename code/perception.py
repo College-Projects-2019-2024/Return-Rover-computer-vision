@@ -104,11 +104,19 @@ def DtoDDD(oneDImg,ref):
     DDDImage[:,:,1] = oneDImg
     DDDImage[:,:,2] = oneDImg
     return DDDImage
+#converts BGR to RGB
+def cvtClr(img):
+    img = cv2.cvtColor(img,cv2.COLOR_BGR2RGB)
+    return img
     
 #shows the output needed in debugging mode
 def show_img(img,warped,nav_terrain,rocks):
+    warped = cvtClr(warped)
+    img = cvtClr(img)
+    
     nav_terrain_3d = DtoDDD(nav_terrain,img)
     rocks_3d = DtoDDD(rocks,img)
+    
     hori1 = np.concatenate((img,warped),axis=1)
     hori = np.concatenate((nav_terrain_3d,rocks_3d),axis=1)
     vert = np.concatenate((hori1,hori),axis=0)
