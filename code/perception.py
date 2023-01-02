@@ -245,6 +245,8 @@ def perception_step(Rover):
     thresholde = cv2.morphologyEx(navigable_processed, cv2.MORPH_OPEN, kernelb)
     thresholde = cv2.morphologyEx(thresholde, cv2.MORPH_CLOSE, kernels)
     xpix_navigable_processed, ypix_navigable_processed = rover_coords(thresholde)
+    xpix_navigable_processed, ypix_navigable_processed   = impose(xpix_navigable_processed, ypix_navigable_processed)
+ 
     _, Rover.nav_angles_processed= to_polar_coords(xpix_navigable_processed, ypix_navigable_processed)
                                     #######################################################################3
 
@@ -271,6 +273,8 @@ def perception_step(Rover):
     # 6) Convert rover-centric pixel values to world coordinates
     scale = 10.0
     xpix_navigable, ypix_navigable = impose(xpix_navigable, ypix_navigable)
+
+
     xpix_obstacles, ypix_obstacles = impose(xpix_obstacles, ypix_obstacles)
     navigable_x_world, navigable_y_world = pix_to_world(xpix_navigable, ypix_navigable,
                                                         Rover.pos[0], Rover.pos[1],

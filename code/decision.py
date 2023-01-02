@@ -25,7 +25,7 @@ def cost(peak, prefix, xo, yo, yaw, vis):
                     c+= vis[jj][ii]
 
 
-    ans = prefix[peak] - 1500*c
+    ans = int(prefix[peak]/40) - 1500*c
 
     ##ans = prefix[peak]
     return ans
