@@ -25,7 +25,7 @@ def cost(peak, prefix, xo, yo, yaw, vis):
                     c+= vis[jj][ii]
 
 
-    ans = int(prefix[peak]/40) - 1500*c
+    ans = 150*c - int(prefix[peak]) 
 
     ##ans = prefix[peak]
     return ans
@@ -75,7 +75,7 @@ def Angle (Rover):
         ##print((simplified_peaks-Rover.prefixshift)*Rover.prefixScale )
         xo, yo = Rover.pos
         for p in simplified_peaks:
-            if ( cost(p,Rover.simplified_prefix,xo,yo,Rover.yaw, Rover.vis) > cost(ans,Rover.simplified_prefix,xo,yo,Rover.yaw, Rover.vis)):
+            if ( cost(p,Rover.simplified_prefix,xo,yo,Rover.yaw, Rover.vis) < cost(ans,Rover.simplified_prefix,xo,yo,Rover.yaw, Rover.vis)): #cheapest
                 ans = p
         Rover.pid.setpoint = (ans-Rover.prefixshift)*Rover.prefixScale
         return int (Rover.pid(Rover.steer))
@@ -134,6 +134,10 @@ def decision_step(Rover):
                     Rover.brake = Rover.brake_set
                     Rover.steer = 0
                     Rover.mode = 'stop'
+                    if (cost(0, [0], xx, yy, Rover.yaw+90, Rover.vis) - cost(0, [0], xx, yy, Rover.yaw-90, Rover.vis) < 200) :
+                        Rover.last_steer = +1
+                    else:
+                        Rover.last_steer = -1
 
         # If we're already in "stop" mode then make different decisions
         elif Rover.mode == 'stop':
@@ -150,7 +154,7 @@ def decision_step(Rover):
                     # Release the brake to allow turning
                     Rover.brake = 0
                     # Turn range is +/- 15 degrees, when stopped the next line will induce 4-wheel turning
-                    if (Rover.last_steer <=0 ) :
+                    if Rover.last_steer <= 0 :
                         Rover.steer = -15
                     else:
                         Rover.steer = 15

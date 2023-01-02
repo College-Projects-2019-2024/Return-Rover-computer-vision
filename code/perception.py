@@ -272,10 +272,10 @@ def perception_step(Rover):
 
     # 6) Convert rover-centric pixel values to world coordinates
     scale = 10.0
-    xpix_navigable, ypix_navigable = impose(xpix_navigable, ypix_navigable)
+    xpix_navigable, ypix_navigable = impose(xpix_navigable, ypix_navigable, range=80)
 
 
-    xpix_obstacles, ypix_obstacles = impose(xpix_obstacles, ypix_obstacles)
+    xpix_obstacles, ypix_obstacles = impose(xpix_obstacles, ypix_obstacles, range=120)
     navigable_x_world, navigable_y_world = pix_to_world(xpix_navigable, ypix_navigable,
                                                         Rover.pos[0], Rover.pos[1],
                                                         Rover.yaw, Rover.worldmap.shape[0], scale)

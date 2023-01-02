@@ -92,8 +92,9 @@ class RoverState():
 
 
         self.pid = PID(0.4, 0.1, 0.0, setpoint=0)
-        self.mapScale = 10
-        self.vis = np.zeros((int (200/self.mapScale),int (200 /self.mapScale)))
+        self.mapScale = 5
+        self.vis = np.ones((int (200/self.mapScale),int (200 /self.mapScale)))
+        self.vis =-1 * self.vis
 
 
         self.simplified_prefix = None
