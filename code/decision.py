@@ -161,7 +161,12 @@ def decision_step(Rover):
                     Rover.brake = Rover.brake_set
                     Rover.steer = 0
                     Rover.mode = 'stop'
-                    if (cost(0, [0], xx, yy, Rover.yaw+90, Rover.vis) - cost(0, [0], xx, yy, Rover.yaw-90, Rover.vis) < 250) :
+                    xxx = 0
+                    if (len(Rover.nav_angles) < int (Rover.stop_forward /2)):
+                        xxx = 90
+                    else:
+                        xxx = 45
+                    if (cost(0, [0], xx, yy, Rover.yaw+xxx, Rover.vis) - cost(0, [0], xx, yy, Rover.yaw-xxx, Rover.vis) < 250) :
                         Rover.last_steer = +1
                     else:
                         Rover.last_steer = -1

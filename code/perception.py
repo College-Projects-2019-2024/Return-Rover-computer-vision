@@ -292,7 +292,7 @@ def perception_step(Rover):
         #          Rover.worldmap[navigable_y_world, navigable_x_world, 2] += 1
 
         # Only update map if pitch an roll are near zero
-    if (Rover.pitch < 0.3 or Rover.pitch > 359.7) and (Rover.roll < 0.3 or Rover.roll > 359.7):
+    if (Rover.pitch < 0.2 or Rover.pitch > 359.8) and (Rover.roll < 0.5 or Rover.roll > 359.5):
         # increment = 10
         Rover.worldmap[obstacle_y_world, obstacle_x_world, 0] = 255
         Rover.worldmap[rock_y_world, rock_x_world,1] = 255
@@ -300,9 +300,6 @@ def perception_step(Rover):
             # remove overlap mesurements
         nav_pix = Rover.worldmap[:, :, 2] > 0
         Rover.worldmap[nav_pix, 0] = 0
-            # clip to avoid overflow
-        Rover.worldmap = np.clip(Rover.worldmap, 0, 255)
-       
 
     # 8) Convert rover-centric pixel positions to polar coordinates
     # Update Rover pixel distances and angles
