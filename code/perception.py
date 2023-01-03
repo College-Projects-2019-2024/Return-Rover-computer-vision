@@ -1,5 +1,11 @@
 import numpy as np
 import cv2
+import matplotlib.image as mpimg
+import matplotlib.pyplot as plt
+import glob as glob
+from moviepy.video.io.bindings import mplfig_to_npimage
+from scipy.signal import find_peaks
+from scipy.optimize import curve_fit
 
 
 def sub(arr, window):   
@@ -214,7 +220,36 @@ src = get_src()
 kernel = np.ones((3,3))
 
 
+
+#plot the frequency array of the angle
+
+#converts a 1d image to 3d image
+def DtoDDD(oneDImg,ref):
+    DDDImage = np.zeros_like(ref)
+    DDDImage[:,:,0] = oneDImg
+    DDDImage[:,:,1] = oneDImg
+    DDDImage[:,:,2] = oneDImg
+    return DDDImage
+#converts BGR to RGB
+def cvtClr(img):
+    img = cv2.cvtColor(img,cv2.COLOR_BGR2RGB)
+    return img
+
+#shows the output needed in debugging mode
+def show_img(img,warped,nav_terrain ):
+    warped = cvtClr(warped)
+    img = cvtClr(img)
+    nav_terrain_3d = DtoDDD(nav_terrain,img)
+    hori1 = np.concatenate((img,warped),axis=1)
+    hori = np.concatenate((nav_terrain_3d,nav_terrain_3d),axis=1)
+    vert = np.concatenate((hori1,hori),axis=0)
+    cv2.imshow('debugging',vert)
+    cv2.waitKey(1)
+
+
 def perception_step(Rover):
+
+
     # Perform perception steps to update Rover()
     # TODO: 
     # NOTE: camera image is coming to you in Rover.img
@@ -314,5 +349,13 @@ def perception_step(Rover):
     rock_dist, rock_angles = to_polar_coords(xpix_rocks, ypix_rocks)
     Rover.rock_dists = rock_dist
     Rover.rock_angles = rock_angles
+
+
+
+
+
+    show_img(img,warped,Rover.vision_image[:,:,2])
+
+
 
     return Rover
