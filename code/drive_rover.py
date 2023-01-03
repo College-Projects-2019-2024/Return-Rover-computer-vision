@@ -117,8 +117,8 @@ class RoverState():
 
         self.simplified_freq = None
         self.freqScale = 3
-        self.freqSize = int (180 / self.prefixScale)
-        self.freqshift = int (self.prefixSize /2)
+        self.freqSize = int (180 / self.freqScale)
+        self.freqshift = int (self.freqSize /2)
 
 
 
