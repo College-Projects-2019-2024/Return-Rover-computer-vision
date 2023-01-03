@@ -204,7 +204,7 @@ def decision_step(Rover):
             Rover.pid.auto_mode = False 
             if( Rover.total_time - Rover.rock_reverse_time < 14):
                 Rover.brake = 0
-                Rover.throttle = -0.1
+                Rover.throttle = -0.18
 
             else:
                 Rover.brake = Rover.brake_set
