@@ -118,7 +118,7 @@ class RoverState():
         self.freqScale = 3
         self.freqSize = int (180 / self.freqScale)
         self.freqshift = int (self.freqSize /2)
-
+        self.mapped = 0
 
 
 
