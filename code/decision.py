@@ -71,7 +71,7 @@ def Angle (Rover):
             if ( cost(p,Rover.simplified_freq,xo,yo,Rover.yaw, Rover.vis) < cost(ans,Rover.simplified_freq,xo,yo,Rover.yaw, Rover.vis)): #cheapest
                 ans = p
         
-        Rover.pid.setpoint = np.clip((ans-Rover.freqxshift)*Rover.freqScale, -15, 15)
+        Rover.pid.setpoint = np.clip((ans-Rover.freqshift)*Rover.freqScale, -15, 15)
         return int (Rover.pid(Rover.steer))
 
         
