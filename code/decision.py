@@ -8,7 +8,7 @@ import math
 # This is where you can build a decision tree for determining throttle, brake and steer 
 # commands based on the output of the perception_step() function
 
-def cost(peak, prefix, xo, yo, yaw, vis):
+def cost(peak, freq, xo, yo, yaw, vis):
     
     c=0
     for r in range (12):
