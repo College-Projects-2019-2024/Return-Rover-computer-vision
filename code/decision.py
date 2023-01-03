@@ -26,9 +26,9 @@ def cost(peak, prefix, xo, yo, yaw, vis):
                     c+= vis[jj][ii]
 
 
-    ans = 1000*c - int(prefix[peak]) 
+    ans = 1000*c - int(freq[peak]) 
 
-    ##ans = prefix[peak]
+    ##ans = freq[peak]
     return ans
 
 def mapping1(values_x,a,b,c): 
@@ -55,15 +55,15 @@ def Angle (Rover):
 
 
     '''    
-    Rover.simplified_prefix = np.zeros(Rover.prefixSize)
+    Rover.simplified_freq = np.zeros(Rover.freqSize)
 
     for x in Rover.nav_angles_processed:
         f= x*360 / (2*np.pi)
-        Rover.simplified_prefix[round (f/Rover.prefixScale)+Rover.prefixshift]+=1
+        Rover.simplified_freq[round (f/Rover.freqScale)+Rover.freqshift]+=1
         
 
 
-    simplified_peaks, _ = find_peaks(Rover.simplified_prefix , distance=Rover.prefixScale,height=np.max(Rover.simplified_prefix )/4, threshold = 1)
+    simplified_peaks, _ = find_peaks(Rover.simplified_freq , distance=Rover.freqScale,height=np.max(Rover.simplified_freq )/4, threshold = 1)
 
 
 
@@ -73,13 +73,13 @@ def Angle (Rover):
 
     else:
         ans = simplified_peaks[0]
-        ##print((simplified_peaks-Rover.prefixshift)*Rover.prefixScale )
+
         xo, yo = Rover.pos
         for p in simplified_peaks:
-            if ( cost(p,Rover.simplified_prefix,xo,yo,Rover.yaw, Rover.vis) < cost(ans,Rover.simplified_prefix,xo,yo,Rover.yaw, Rover.vis)): #cheapest
+            if ( cost(p,Rover.simplified_freq,xo,yo,Rover.yaw, Rover.vis) < cost(ans,Rover.simplified_freq,xo,yo,Rover.yaw, Rover.vis)): #cheapest
                 ans = p
         
-        Rover.pid.setpoint = np.clip((ans-Rover.prefixshift)*Rover.prefixScale, -15, 15)
+        Rover.pid.setpoint = np.clip((ans-Rover.freqxshift)*Rover.freqScale, -15, 15)
         return int (Rover.pid(Rover.steer))
 
         
@@ -173,7 +173,7 @@ def decision_step(Rover):
                     Rover.last_steer = -1
             # If there's a lack of navigable terrain pixels then go to 'stop' mode
 
-            elif  len(Rover.nav_angles) < Rover.stop_forward or (Rover.simplified_prefix[Rover.prefixshift]+Rover.simplified_prefix[Rover.prefixshift+1] +Rover.simplified_prefix[Rover.prefixshift-1] < 1200) :
+            elif  len(Rover.nav_angles) < Rover.stop_forward or (Rover.simplified_freq[Rover.freqshift]+Rover.simplified_freq[Rover.freqshift+1] +Rover.simplified_freq[Rover.freqshift-1] < 1200) :
                     # Set mode to "stop" and hit the brakes!
                     Rover.throttle = 0
                     # Set brake to stored brake value
