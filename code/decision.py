@@ -192,9 +192,11 @@ def decision_step(Rover):
                 # Turn range is +/- 15 degrees, when stopped the next line will induce 4-wheel turning
                 # Since hugging left wall steering should be to the right:
                 if Rover.last_steer <= 0 :
-                        Rover.steer = -15
+                    Rover.pid.setpoint = (-15)
+                    Rover.steer = Rover.pid(Rover.steer)
                 else:
-                    Rover.steer = 15
+                    Rover.pid.setpoint = (15)
+                    Rover.steer = Rover.pid(Rover.steer)
         
         
         
@@ -214,9 +216,11 @@ def decision_step(Rover):
                     Rover.brake = 0
                     # Turn range is +/- 15 degrees, when stopped the next line will induce 4-wheel turning
                     if Rover.last_steer <= 0 :
-                        Rover.steer = -15
+                        Rover.pid.setpoint = (-15)
+                        Rover.steer = Rover.pid(Rover.steer)
                     else:
-                        Rover.steer = 15
+                        Rover.pid.setpoint = (15)
+                        Rover.steer = Rover.pid(Rover.steer)
 
                     
                      # Could be more clever here about which way to turn
