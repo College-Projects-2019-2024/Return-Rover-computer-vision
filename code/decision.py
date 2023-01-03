@@ -27,8 +27,6 @@ def cost(peak, prefix, xo, yo, yaw, vis):
 
 
     ans = 1000*c - int(freq[peak]) 
-
-    ##ans = freq[peak]
     return ans
 
 def mapping1(values_x,a,b,c): 
