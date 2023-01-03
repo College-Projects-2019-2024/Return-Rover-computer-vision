@@ -115,10 +115,10 @@ class RoverState():
         self.vis =-10 * self.vis
 
 
-        self.simplified_prefix = None
-        self.prefixScale = 3
-        self.prefixSize = int (180 / self.prefixScale)
-        self.prefixshift = int (self.prefixSize /2)
+        self.simplified_freq = None
+        self.freqScale = 3
+        self.freqSize = int (180 / self.prefixScale)
+        self.freqshift = int (self.prefixSize /2)
 
 
 
